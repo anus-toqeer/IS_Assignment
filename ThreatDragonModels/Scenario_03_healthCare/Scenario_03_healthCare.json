@@ -2,7 +2,7 @@
   "version": "2.0",
   "summary": {
     "title": "Scenario 3 - Microservices Healthcare Application",
-    "owner": "Anus Toqeer(M012)",
+    "owner": "BCSF24M012",
     "description": "A healthcare microservices patient management system with Patient Portal, API Gateway, Identity Service, Medical Records Service, Appointment Service, and Notification Service.",
     "id": 2
   },
@@ -19,8 +19,8 @@
         "cells": [
           {
             "type": "tm.BoundaryBox",
-            "size": { "width": 180, "height": 120 },
-            "position": { "x": 20, "y": 350 },
+            "size": { "width": 200, "height": 130 },
+            "position": { "x": 15, "y": 395 },
             "attrs": { "label": { "text": "Public Internet" } },
             "shape": "trust-boundary-box",
             "id": "boundary-internet",
@@ -28,27 +28,27 @@
             "data": {
               "type": "tm.BoundaryBox",
               "name": "Public Internet",
-              "description": "Untrusted external zone. All traffic from here is treated as hostile until authenticated."
+              "description": "Untrusted external zone. All traffic from here is treated as hostile until authenticated and authorised."
             }
           },
           {
             "type": "tm.BoundaryBox",
-            "size": { "width": 210, "height": 500 },
-            "position": { "x": 230, "y": 100 },
-            "attrs": { "label": { "text": "DMZ (Perimeter Zone)" } },
+            "size": { "width": 215, "height": 560 },
+            "position": { "x": 245, "y": 155 },
+            "attrs": { "label": { "text": "DMZ - Perimeter Zone" } },
             "shape": "trust-boundary-box",
             "id": "boundary-dmz",
             "zIndex": 1,
             "data": {
               "type": "tm.BoundaryBox",
-              "name": "DMZ (Perimeter Zone)",
-              "description": "Perimeter zone containing the Patient Portal and API Gateway. Only components exposed to the public internet. Separates untrusted internet traffic from all internal services."
+              "name": "DMZ - Perimeter Zone",
+              "description": "Perimeter zone containing only the Patient Portal and API Gateway. These are the only two components exposed to the public internet. Acts as the security boundary between untrusted internet traffic and all internal services."
             }
           },
           {
             "type": "tm.BoundaryBox",
-            "size": { "width": 490, "height": 680 },
-            "position": { "x": 480, "y": 30 },
+            "size": { "width": 465, "height": 800 },
+            "position": { "x": 635, "y": 30 },
             "attrs": { "label": { "text": "Internal Services Zone" } },
             "shape": "trust-boundary-box",
             "id": "boundary-internal",
@@ -56,13 +56,13 @@
             "data": {
               "type": "tm.BoundaryBox",
               "name": "Internal Services Zone",
-              "description": "Trusted internal network zone hosting all backend microservices. Not accessible from the public internet. All traffic must enter through the API Gateway."
+              "description": "Trusted internal network hosting all backend microservices. Not directly reachable from the public internet. All inbound traffic must pass through the API Gateway."
             }
           },
           {
             "type": "tm.BoundaryBox",
-            "size": { "width": 190, "height": 280 },
-            "position": { "x": 1030, "y": 270 },
+            "size": { "width": 200, "height": 350 },
+            "position": { "x": 1240, "y": 310 },
             "attrs": { "label": { "text": "Third-Party Providers" } },
             "shape": "trust-boundary-box",
             "id": "boundary-thirdparty",
@@ -70,13 +70,13 @@
             "data": {
               "type": "tm.BoundaryBox",
               "name": "Third-Party Providers Zone",
-              "description": "External untrusted zone hosting third-party SMS and email delivery providers. All outbound communications must be encrypted."
+              "description": "External untrusted zone hosting third-party SMS and email delivery providers used by the Notification Service. All outbound communications crossing this boundary must be encrypted."
             }
           },
           {
             "type": "tm.Actor",
-            "size": { "width": 120, "height": 60 },
-            "position": { "x": 50, "y": 380 },
+            "size": { "width": 130, "height": 65 },
+            "position": { "x": 40, "y": 430 },
             "attrs": { "text": { "text": "Patient" } },
             "shape": "actor",
             "id": "actor-patient",
@@ -84,15 +84,15 @@
             "data": {
               "type": "tm.Actor",
               "name": "Patient",
-              "description": "End user accessing the healthcare portal from a browser over the public internet to view records and book appointments",
+              "description": "End user accessing the healthcare portal from a browser over the public internet to view medical records and book appointments",
               "outOfScope": false,
               "threats": []
             }
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 270, "y": 150 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 285, "y": 210 },
             "attrs": { "text": { "text": "Patient Portal" } },
             "shape": "process",
             "id": "process-portal",
@@ -100,7 +100,7 @@
             "data": {
               "type": "tm.Process",
               "name": "Patient Portal",
-              "description": "Web frontend exposed to the public internet. Patients log in, view medical records, and book appointments. Communicates with the API Gateway for all backend operations.",
+              "description": "Web frontend exposed to the public internet. Patients log in, view medical records, and book appointments. All backend calls go through the API Gateway.",
               "outOfScope": false,
               "threats": [
                 {
@@ -109,8 +109,8 @@
                   "type": "Spoofing",
                   "status": "Open",
                   "severity": "High",
-                  "description": "An attacker creates a convincing replica of the patient portal login page and tricks patients into submitting their credentials via phishing emails. Captured credentials are then used to impersonate legitimate patients and access their medical records.",
-                  "mitigation": "Enforce multi-factor authentication for all patient accounts. Implement HSTS and certificate pinning. Monitor for login anomalies such as unusual geolocations or unrecognised devices. Align with OWASP Top 10 A07 Identification and Authentication Failures.",
+                  "description": "An attacker creates a convincing replica of the patient portal login page and tricks patients into submitting credentials via phishing emails. Captured credentials are used to impersonate patients and access their medical records.",
+                  "mitigation": "Enforce multi-factor authentication for all patient accounts. Implement HSTS and certificate pinning. Monitor for login anomalies such as unusual geolocations. Align with OWASP Top 10 A07 Identification and Authentication Failures.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -119,7 +119,7 @@
                   "type": "Tampering",
                   "status": "Open",
                   "severity": "High",
-                  "description": "An attacker injects malicious JavaScript through unsanitised user input fields such as appointment notes. When other patients or staff view the affected pages the script executes in their browser, stealing session tokens or redirecting to malicious sites.",
+                  "description": "An attacker injects malicious JavaScript through unsanitised input fields such as appointment notes. When other patients or staff view the page the script executes, stealing session tokens or redirecting users to malicious sites.",
                   "mitigation": "Implement a strict Content Security Policy header. Sanitise and HTML-encode all user-supplied output server-side. Set HttpOnly and Secure flags on all session cookies. Perform regular penetration testing of frontend input fields.",
                   "modelType": "STRIDE"
                 }
@@ -128,8 +128,8 @@
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 270, "y": 460 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 285, "y": 550 },
             "attrs": { "text": { "text": "API Gateway" } },
             "shape": "process",
             "id": "process-gateway",
@@ -142,12 +142,12 @@
               "threats": [
                 {
                   "id": "threat-3",
-                  "title": "API Gateway DDoS Rendering All Services Unavailable",
+                  "title": "API Gateway DDoS Attack",
                   "type": "Denial of service",
                   "status": "Open",
                   "severity": "High",
-                  "description": "An attacker floods the API Gateway with a high volume of requests, exhausting its processing capacity. Since all internal services are routed exclusively through the gateway, a successful attack makes the entire system unavailable, preventing patients from accessing records or booking urgent appointments.",
-                  "mitigation": "Deploy rate limiting and throttling per client IP and per authenticated user. Integrate a cloud-based DDoS mitigation service in front of the gateway. Implement auto-scaling and circuit breakers. Align with NIST 800-53 SC-5 Denial of Service Protection.",
+                  "description": "An attacker floods the API Gateway with high-volume requests, exhausting its processing capacity. Since all internal services are routed exclusively through the gateway, a successful attack makes the entire patient management system unavailable.",
+                  "mitigation": "Deploy rate limiting and throttling per client IP and per authenticated user. Integrate a cloud-based DDoS mitigation service. Implement auto-scaling and circuit breakers. Align with NIST 800-53 SC-5 Denial of Service Protection.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -156,8 +156,8 @@
                   "type": "Information disclosure",
                   "status": "Open",
                   "severity": "Critical",
-                  "description": "A misconfigured routing rule or overly permissive gateway policy inadvertently exposes internal medical record endpoints to the public internet without authentication. An attacker enumerating API paths could retrieve protected health information without any valid credentials.",
-                  "mitigation": "Apply a whitelist-only approach to API Gateway routing, denying all unlisted paths by default. Enforce JWT validation at the gateway before routing any request. Conduct regular gateway configuration audits and automated security scanning. Align with OWASP API Security Top 10 API3 Broken Object Property Level Authorisation.",
+                  "description": "A misconfigured routing rule or overly permissive policy inadvertently exposes internal medical record endpoints to the public internet without authentication. An attacker enumerating API paths could retrieve protected health information with no valid credentials.",
+                  "mitigation": "Apply a whitelist-only approach to API routing, denying all unlisted paths by default. Enforce JWT validation at the gateway before routing any request. Conduct regular configuration audits and automated security scanning. Align with OWASP API Security Top 10 API3.",
                   "modelType": "STRIDE"
                 }
               ]
@@ -165,8 +165,8 @@
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 540, "y": 80 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 680, "y": 70 },
             "attrs": { "text": { "text": "Identity Service" } },
             "shape": "process",
             "id": "process-identity",
@@ -183,8 +183,8 @@
                   "type": "Spoofing",
                   "status": "Open",
                   "severity": "Critical",
-                  "description": "If the Identity Service uses a weak or default secret key to sign JWTs, an attacker can forge arbitrary tokens granting themselves any patient identity or administrative role. All internal services accepting these tokens without proper verification would process malicious requests as authenticated.",
-                  "mitigation": "Use RS256 asymmetric signing with a minimum 2048-bit RSA key pair. Store private keys in an HSM or secrets manager. Rotate signing keys periodically. Implement short JWT expiry times. All services must validate token signature, issuer, audience, and expiry on every request. Align with NIST 800-53 IA-5.",
+                  "description": "If the Identity Service uses a weak or default secret key to sign JWTs, an attacker can forge tokens granting any patient identity or administrative role. All internal services accepting these tokens without proper verification will process malicious requests as authenticated.",
+                  "mitigation": "Use RS256 asymmetric signing with a minimum 2048-bit RSA key pair. Store private keys in an HSM or secrets manager. Rotate signing keys periodically. Implement short JWT expiry times. All services must validate token signature, issuer, audience, and expiry on every request.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -193,8 +193,8 @@
                   "type": "Elevation of privilege",
                   "status": "Open",
                   "severity": "High",
-                  "description": "An attacker manipulates the OAuth 2.0 authorisation request to the Identity Service, requesting broader scopes than entitled, for example requesting write access to medical records when only read access to their own appointments should be granted. An overly permissive Identity Service issues the inflated JWT, granting excess permissions across all internal services.",
-                  "mitigation": "Enforce strict server-side scope validation, ignoring any client-requested scopes not explicitly pre-approved. Implement least privilege for all OAuth scopes. Log all token issuance events with requested and granted scopes for audit purposes.",
+                  "description": "An attacker manipulates the OAuth 2.0 request to claim broader scopes than entitled, for example requesting write access to medical records when only read access should be granted. An overly permissive Identity Service issues the inflated JWT, granting excess permissions across all internal services.",
+                  "mitigation": "Enforce strict server-side scope validation, ignoring client-requested scopes not pre-approved. Implement least privilege for all OAuth scopes. Log all token issuance events with requested and granted scopes for audit purposes.",
                   "modelType": "STRIDE"
                 }
               ]
@@ -202,8 +202,8 @@
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 540, "y": 310 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 680, "y": 340 },
             "attrs": { "text": { "text": "Medical Records Service" } },
             "shape": "process",
             "id": "process-medrecords",
@@ -216,12 +216,12 @@
               "threats": [
                 {
                   "id": "threat-7",
-                  "title": "Unauthorised Record Access via Broken Object Level Authorisation",
+                  "title": "Broken Object Level Authorisation on Patient Records",
                   "type": "Elevation of privilege",
                   "status": "Open",
                   "severity": "Critical",
-                  "description": "The Medical Records Service does not enforce object-level authorisation checks. An authenticated patient can access other patients records by simply modifying the patient ID in the request. This allows mass exposure of protected health information for any patient in the system.",
-                  "mitigation": "Implement mandatory object-level authorisation for every record operation, verifying the requesting user identity in the JWT matches the patient ID of the requested record. Apply OWASP API Security Top 10 API1 Broken Object Level Authorisation controls. Conduct regular authorisation penetration testing.",
+                  "description": "The Medical Records Service does not enforce object-level authorisation. An authenticated patient can access another patient records by modifying the patient ID in the request. This allows mass exposure of protected health information for any patient in the system.",
+                  "mitigation": "Implement mandatory object-level authorisation for every record operation, verifying the requesting user identity in the JWT matches the patient ID of the requested record. Apply OWASP API Security Top 10 API1 Broken Object Level Authorisation controls.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -230,8 +230,8 @@
                   "type": "Tampering",
                   "status": "Open",
                   "severity": "Critical",
-                  "description": "An attacker compromising an internal service account can send authenticated requests to modify or delete patient records, alter diagnoses, or remove prescriptions. Without write integrity controls the tampered data is indistinguishable from legitimate records, posing a direct patient safety risk.",
-                  "mitigation": "Enforce role-based access control distinguishing read-only patient access from write access reserved for clinical staff. Implement cryptographic signing of medical record entries. Enable immutable audit logging for all create, update, and delete operations. Follow NIST 800-53 SI-7 Software and Information Integrity.",
+                  "description": "An attacker compromising an internal service account can send authenticated requests to modify or delete patient records, alter diagnoses, or remove prescriptions. Without integrity controls, tampered data is indistinguishable from legitimate records, posing a direct patient safety risk.",
+                  "mitigation": "Enforce role-based access control separating read-only patient access from write access reserved for clinical staff. Implement cryptographic signing of medical record entries. Enable immutable audit logging for all create, update, and delete operations. Follow NIST 800-53 SI-7.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -240,8 +240,8 @@
                   "type": "Repudiation",
                   "status": "Open",
                   "severity": "High",
-                  "description": "Without comprehensive immutable audit logging a malicious insider who accesses or modifies patient records can deny having done so. This also makes it impossible to satisfy HIPAA audit control requirements, investigate data breaches, or detect patterns of unauthorised access.",
-                  "mitigation": "Implement append-only audit logging for all access and modification events, capturing user identity, timestamp, action, record ID, and source IP. Store logs in a separate tamper-evident log store. Retain logs as required by healthcare regulations. Align with ISO 27001 A.12.4 Logging and Monitoring.",
+                  "description": "Without immutable audit logging a malicious insider who accesses or modifies patient records can deny having done so. This also makes it impossible to satisfy HIPAA audit control requirements or investigate data breaches.",
+                  "mitigation": "Implement append-only audit logging for all access and modification events, capturing user identity, timestamp, action, record ID, and source IP. Store logs in a separate tamper-evident store. Retain logs as required by healthcare regulations. Align with ISO 27001 A.12.4.",
                   "modelType": "STRIDE"
                 }
               ]
@@ -249,8 +249,8 @@
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 540, "y": 550 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 680, "y": 620 },
             "attrs": { "text": { "text": "Appointment Service" } },
             "shape": "process",
             "id": "process-appt",
@@ -267,8 +267,8 @@
                   "type": "Repudiation",
                   "status": "Open",
                   "severity": "Medium",
-                  "description": "The Appointment Service does not maintain a verifiable record of who booked, modified, or cancelled an appointment and when. A rogue staff member could cancel critical appointments and deny responsibility with no audit evidence available, posing both a patient safety risk and a regulatory compliance failure.",
-                  "mitigation": "Log all appointment events with the authenticated user identity, timestamp, and change details in an immutable audit trail. Implement digital signatures on appointment records for cryptographic non-repudiation. Align with HIPAA audit control requirements under 45 CFR 164.312.",
+                  "description": "The Appointment Service does not maintain a verifiable record of who booked, modified, or cancelled an appointment. A rogue staff member could cancel critical appointments and deny responsibility with no audit evidence, posing both a patient safety risk and a compliance failure.",
+                  "mitigation": "Log all appointment events with authenticated user identity, timestamp, and change details in an immutable audit trail. Implement digital signatures on appointment records for cryptographic non-repudiation. Align with HIPAA audit control requirements under 45 CFR 164.312.",
                   "modelType": "STRIDE"
                 }
               ]
@@ -276,8 +276,8 @@
           },
           {
             "type": "tm.Process",
-            "size": { "width": 110, "height": 110 },
-            "position": { "x": 810, "y": 400 },
+            "size": { "width": 120, "height": 120 },
+            "position": { "x": 990, "y": 440 },
             "attrs": { "text": { "text": "Notification Service" } },
             "shape": "process",
             "id": "process-notif",
@@ -294,8 +294,8 @@
                   "type": "Information disclosure",
                   "status": "Open",
                   "severity": "High",
-                  "description": "The Notification Service includes excessive patient health information such as diagnosis details in SMS or email payloads sent to third-party providers. Once this data crosses the trust boundary to an external provider the organisation loses control over it, risking PHI exposure in violation of HIPAA if the provider is breached.",
-                  "mitigation": "Enforce data minimisation in all outbound notifications, including only appointment date and time. Never include diagnosis or medication details. Encrypt all payloads in transit using TLS 1.2 or higher. Review third-party provider data agreements for HIPAA compliance. Apply NIST 800-53 SC-8 Transmission Confidentiality.",
+                  "description": "The Notification Service includes excessive patient health information such as diagnosis details in SMS or email payloads sent to third-party providers. Once this data crosses the trust boundary the organisation loses control, risking PHI exposure in violation of HIPAA if the provider is breached.",
+                  "mitigation": "Enforce data minimisation in all outbound notifications, including only appointment date and time. Never include diagnosis or medication details. Encrypt all payloads in transit using TLS 1.2 or higher. Review third-party agreements for HIPAA compliance. Apply NIST 800-53 SC-8.",
                   "modelType": "STRIDE"
                 },
                 {
@@ -304,8 +304,8 @@
                   "type": "Denial of service",
                   "status": "Open",
                   "severity": "Medium",
-                  "description": "An attacker exploiting a vulnerability in the Appointment Service can trigger the Notification Service to dispatch large volumes of SMS or email messages, exhausting third-party provider quotas and API rate limits. This disables legitimate appointment reminders for all patients and may incur significant financial cost.",
-                  "mitigation": "Implement strict per-user and per-appointment rate limits on notification dispatch. Validate notification recipients match the patient identity in the JWT before sending. Monitor third-party API usage and alert on anomalous volume spikes. Use message queues with backpressure controls.",
+                  "description": "An attacker exploiting a vulnerability in the Appointment Service can trigger the Notification Service to send large volumes of SMS or email messages, exhausting third-party provider API quotas. This disables legitimate appointment reminders for all patients and may incur significant financial cost.",
+                  "mitigation": "Implement strict per-user and per-appointment rate limits on notification dispatch. Validate notification recipients match the patient identity in the JWT. Monitor third-party API usage and alert on anomalous volume spikes. Use message queues with backpressure controls.",
                   "modelType": "STRIDE"
                 }
               ]
@@ -313,8 +313,8 @@
           },
           {
             "type": "tm.Actor",
-            "size": { "width": 130, "height": 60 },
-            "position": { "x": 1050, "y": 300 },
+            "size": { "width": 140, "height": 65 },
+            "position": { "x": 1260, "y": 350 },
             "attrs": { "text": { "text": "SMS Provider" } },
             "shape": "actor",
             "id": "actor-sms",
@@ -329,8 +329,8 @@
           },
           {
             "type": "tm.Actor",
-            "size": { "width": 130, "height": 60 },
-            "position": { "x": 1050, "y": 460 },
+            "size": { "width": 140, "height": 65 },
+            "position": { "x": 1260, "y": 540 },
             "attrs": { "text": { "text": "Email Provider" } },
             "shape": "actor",
             "id": "actor-email",
@@ -347,7 +347,7 @@
             "type": "tm.Flow",
             "source": { "cell": "actor-patient" },
             "target": { "cell": "process-portal" },
-            "vertices": [{ "x": 180, "y": 205 }],
+            "vertices": [{ "x": 185, "y": 270 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
@@ -358,7 +358,30 @@
             "data": {
               "type": "tm.Flow",
               "name": "Portal Access (HTTPS)",
-              "description": "Patient accesses portal login page and submits credentials over HTTPS from the public internet",
+              "description": "Patient accesses the portal login page and submits credentials over HTTPS from the public internet",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "process-portal" },
+            "target": { "cell": "actor-patient" },
+            "vertices": [{ "x": 185, "y": 462 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-2",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Portal Response (HTTPS)" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Portal Response (HTTPS)",
+              "description": "Patient Portal returns requested information or confirmation to the patient browser over HTTPS",
               "outOfScope": false,
               "isBidirectional": false,
               "isEncrypted": true,
@@ -375,13 +398,13 @@
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-2",
+            "id": "flow-3",
             "zIndex": 3,
-            "labels": [{ "attrs": { "label": { "text": "Forward Request" } } }],
+            "labels": [{ "attrs": { "label": { "text": "Forward API Request" } } }],
             "data": {
               "type": "tm.Flow",
-              "name": "Forward Request",
-              "description": "Patient Portal forwards authenticated patient requests to the API Gateway for routing to backend services",
+              "name": "Forward API Request",
+              "description": "Patient Portal forwards authenticated patient requests to the API Gateway for routing to internal backend services",
               "outOfScope": false,
               "isBidirectional": false,
               "isEncrypted": true,
@@ -393,18 +416,18 @@
             "type": "tm.Flow",
             "source": { "cell": "process-gateway" },
             "target": { "cell": "process-identity" },
-            "vertices": [{ "x": 440, "y": 515 }, { "x": 440, "y": 135 }],
+            "vertices": [{ "x": 490, "y": 610 }, { "x": 490, "y": 130 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-3",
+            "id": "flow-4",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "Token Validation Request" } } }],
             "data": {
               "type": "tm.Flow",
               "name": "Token Validation Request",
-              "description": "API Gateway forwards JWT to the Identity Service for signature and claims verification before routing the request",
+              "description": "API Gateway forwards JWT to the Identity Service for signature and claims verification before routing any request to internal services",
               "outOfScope": false,
               "isBidirectional": false,
               "isEncrypted": false,
@@ -416,12 +439,12 @@
             "type": "tm.Flow",
             "source": { "cell": "process-identity" },
             "target": { "cell": "process-gateway" },
-            "vertices": [{ "x": 465, "y": 135 }, { "x": 465, "y": 515 }],
+            "vertices": [{ "x": 530, "y": 130 }, { "x": 530, "y": 610 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-4",
+            "id": "flow-5",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "JWT Validation Result" } } }],
             "data": {
@@ -439,12 +462,12 @@
             "type": "tm.Flow",
             "source": { "cell": "process-gateway" },
             "target": { "cell": "process-medrecords" },
-            "vertices": [{ "x": 420, "y": 365 }],
+            "vertices": [{ "x": 570, "y": 400 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-5",
+            "id": "flow-6",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "Medical Record Request" } } }],
             "data": {
@@ -460,32 +483,9 @@
           },
           {
             "type": "tm.Flow",
-            "source": { "cell": "process-medrecords" },
-            "target": { "cell": "process-gateway" },
-            "vertices": [{ "x": 405, "y": 365 }],
-            "attrs": {
-              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
-            },
-            "shape": "flow",
-            "id": "flow-6",
-            "zIndex": 3,
-            "labels": [{ "attrs": { "label": { "text": "Patient Record Response" } } }],
-            "data": {
-              "type": "tm.Flow",
-              "name": "Patient Record Response",
-              "description": "Medical Records Service returns requested patient health data to the API Gateway for forwarding to the portal",
-              "outOfScope": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "protocol": "Internal REST",
-              "threats": []
-            }
-          },
-          {
-            "type": "tm.Flow",
             "source": { "cell": "process-gateway" },
             "target": { "cell": "process-appt" },
-            "vertices": [{ "x": 420, "y": 605 }],
+            "vertices": [{ "x": 555, "y": 680 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
@@ -506,14 +506,37 @@
           },
           {
             "type": "tm.Flow",
-            "source": { "cell": "process-appt" },
-            "target": { "cell": "process-medrecords" },
-            "vertices": [],
+            "source": { "cell": "process-medrecords" },
+            "target": { "cell": "process-identity" },
+            "vertices": [{ "x": 760, "y": 265 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
             "id": "flow-8",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Verify JWT Token" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Verify JWT Token",
+              "description": "Medical Records Service independently verifies the JWT with the Identity Service before returning any patient data",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "protocol": "Internal gRPC",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "process-appt" },
+            "target": { "cell": "process-medrecords" },
+            "vertices": [{ "x": 720, "y": 545 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-9",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "Read Patient Data" } } }],
             "data": {
@@ -531,12 +554,12 @@
             "type": "tm.Flow",
             "source": { "cell": "process-appt" },
             "target": { "cell": "process-notif" },
-            "vertices": [{ "x": 730, "y": 605 }, { "x": 730, "y": 455 }],
+            "vertices": [{ "x": 900, "y": 680 }, { "x": 900, "y": 500 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-9",
+            "id": "flow-10",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "Trigger Reminder" } } }],
             "data": {
@@ -554,12 +577,12 @@
             "type": "tm.Flow",
             "source": { "cell": "process-notif" },
             "target": { "cell": "actor-sms" },
-            "vertices": [{ "x": 990, "y": 330 }],
+            "vertices": [{ "x": 1190, "y": 382 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-10",
+            "id": "flow-11",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "SMS Reminder (HTTPS)" } } }],
             "data": {
@@ -577,12 +600,12 @@
             "type": "tm.Flow",
             "source": { "cell": "process-notif" },
             "target": { "cell": "actor-email" },
-            "vertices": [{ "x": 990, "y": 490 }],
+            "vertices": [{ "x": 1190, "y": 572 }],
             "attrs": {
               "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
             },
             "shape": "flow",
-            "id": "flow-11",
+            "id": "flow-12",
             "zIndex": 3,
             "labels": [{ "attrs": { "label": { "text": "Email Reminder (SMTP)" } } }],
             "data": {
@@ -593,29 +616,6 @@
               "isBidirectional": false,
               "isEncrypted": true,
               "protocol": "SMTP/HTTPS",
-              "threats": []
-            }
-          },
-          {
-            "type": "tm.Flow",
-            "source": { "cell": "process-portal" },
-            "target": { "cell": "actor-patient" },
-            "vertices": [{ "x": 180, "y": 410 }],
-            "attrs": {
-              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
-            },
-            "shape": "flow",
-            "id": "flow-12",
-            "zIndex": 3,
-            "labels": [{ "attrs": { "label": { "text": "Portal Response (HTTPS)" } } }],
-            "data": {
-              "type": "tm.Flow",
-              "name": "Portal Response (HTTPS)",
-              "description": "Patient Portal returns requested information or confirmation to the patient browser over HTTPS",
-              "outOfScope": false,
-              "isBidirectional": false,
-              "isEncrypted": true,
-              "protocol": "HTTPS",
               "threats": []
             }
           }
