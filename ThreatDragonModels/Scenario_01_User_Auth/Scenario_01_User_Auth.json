@@ -1,9 +1,9 @@
 {
-  "version": "2.6.2",
+  "version": "2.0",
   "summary": {
-    "title": "Scenario_01_User_Auth",
+    "title": "Scenario 1 - User Authentication System",
     "owner": "Anus Toqeer(M012)",
-    "description": "",
+    "description": "A small web application that allows registered users to log in using username and password. The application stores credentials in a relational database, uses session tokens for authenticated sessions, and communicates over HTTPS. No multi-factor authentication is implemented.",
     "id": 0
   },
   "detail": {
@@ -11,17 +11,274 @@
     "diagrams": [
       {
         "id": 0,
-        "title": "Scenario01",
+        "title": "Authentication Flow",
         "diagramType": "STRIDE",
         "placeholder": "New STRIDE diagram description",
-        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
-        "version": "2.6.2",
-        "cells": [],
-        "description": "Data Flow Diagram"
+        "thumbnail": "./public/content/images/thumbnail.jpg",
+        "version": "2.0",
+        "cells": [
+          {
+            "type": "tm.BoundaryBox",
+            "size": { "width": 580, "height": 480 },
+            "position": { "x": 320, "y": 60 },
+            "attrs": {
+              "label": { "text": "Internal Trusted Zone" }
+            },
+            "shape": "trust-boundary-box",
+            "id": "boundary-internal",
+            "zIndex": 1,
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "Internal Trusted Zone",
+              "description": "Trusted internal zone containing the web server, session manager, and user database. Separated from the public internet where the external user resides."
+            }
+          },
+          {
+            "type": "tm.BoundaryBox",
+            "size": { "width": 190, "height": 130 },
+            "position": { "x": 30, "y": 200 },
+            "attrs": {
+              "label": { "text": "Public Internet" }
+            },
+            "shape": "trust-boundary-box",
+            "id": "boundary-internet",
+            "zIndex": 1,
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "Public Internet",
+              "description": "Untrusted external network zone from which the end user initiates login requests over HTTPS"
+            }
+          },
+          {
+            "type": "tm.Actor",
+            "size": { "width": 120, "height": 60 },
+            "position": { "x": 65, "y": 235 },
+            "attrs": { "text": { "text": "User" } },
+            "shape": "actor",
+            "id": "actor-user",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Actor",
+              "name": "User",
+              "description": "Registered user attempting to log in via a web browser over HTTPS from the public internet",
+              "outOfScope": false,
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Process",
+            "size": { "width": 110, "height": 110 },
+            "position": { "x": 370, "y": 90 },
+            "attrs": { "text": { "text": "Web Server" } },
+            "shape": "process",
+            "id": "process-webserver",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "Web Server",
+              "description": "Handles incoming HTTPS login requests, performs input validation, and coordinates with the session manager for authentication",
+              "outOfScope": false,
+              "threats": [
+                {
+                  "id": "threat-1",
+                  "title": "Credential Stuffing and Brute Force Attack",
+                  "type": "Spoofing",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "An attacker uses automated tools to systematically try large lists of known username and password combinations from previous data breaches against the login endpoint. Without rate limiting, thousands of attempts can be made per second, allowing the attacker to impersonate legitimate users whose credentials appear in breach databases.",
+                  "mitigation": "Implement rate limiting per IP address and per account. Apply progressive account lockout after repeated failed attempts. Enforce CAPTCHA for suspicious request patterns. Notify users of failed login attempts via email. Integrate multi-factor authentication as a compensating control.",
+                  "modelType": "STRIDE"
+                },
+                {
+                  "id": "threat-4",
+                  "title": "SQL Injection via Login Form",
+                  "type": "Elevation of privilege",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "An attacker injects malicious SQL code through the username or password input fields to bypass authentication logic entirely. A successful injection can grant unauthorised administrative access, allow extraction of the entire user database, or enable modification and deletion of records without valid credentials.",
+                  "mitigation": "Use parameterised queries or prepared statements exclusively for all database interactions. Apply strict server-side input validation and sanitisation. Deploy a Web Application Firewall as a secondary detection and prevention layer. Conduct regular security-focused code reviews on all input handling logic.",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "type": "tm.Process",
+            "size": { "width": 110, "height": 110 },
+            "position": { "x": 370, "y": 370 },
+            "attrs": { "text": { "text": "Session Manager" } },
+            "shape": "process",
+            "id": "process-session",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Process",
+              "name": "Session Manager",
+              "description": "Generates, validates, and invalidates cryptographically signed session tokens for authenticated users. Manages session lifecycle and expiry.",
+              "outOfScope": false,
+              "threats": [
+                {
+                  "id": "threat-3",
+                  "title": "Session Token Tampering and Forgery",
+                  "type": "Tampering",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "Without cryptographic signing, an attacker who intercepts or guesses a session token can modify its contents to impersonate another user or escalate privileges. Predictable token generation algorithms using weak random seeds make token guessing feasible, enabling full session hijacking and unauthorised account access.",
+                  "mitigation": "Generate session tokens using a cryptographically secure pseudo-random number generator with at least 128 bits of entropy. Sign tokens using HMAC-SHA256 to detect any tampering. Validate token integrity, expiry timestamp, and user binding on every authenticated request server-side. Set HttpOnly and Secure flags on all session cookies. Regenerate tokens after each successful login.",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "type": "tm.Store",
+            "size": { "width": 130, "height": 60 },
+            "position": { "x": 720, "y": 250 },
+            "attrs": { "text": { "text": "User Database" } },
+            "shape": "store",
+            "id": "store-db",
+            "zIndex": 2,
+            "data": {
+              "type": "tm.Store",
+              "name": "User Database",
+              "description": "Relational database storing usernames, hashed passwords, account status, and user profile information",
+              "outOfScope": false,
+              "isALog": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "threats": [
+                {
+                  "id": "threat-2",
+                  "title": "Credential Exposure via Database Breach",
+                  "type": "Information disclosure",
+                  "status": "Open",
+                  "severity": "High",
+                  "description": "If the database is compromised and passwords are stored in plaintext or using weak unsalted hashing algorithms such as MD5 or SHA-1, all user credentials are immediately exposed. Attackers can use the stolen credentials for account takeover on this application and other services where users have reused the same password.",
+                  "mitigation": "Store passwords exclusively using strong adaptive hashing algorithms such as bcrypt or Argon2id with appropriate cost factors. Encrypt the entire database at rest using AES-256. Restrict database network access strictly to application service accounts following the principle of least privilege. Enable database audit logging and monitor for anomalous query patterns.",
+                  "modelType": "STRIDE"
+                }
+              ]
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "actor-user" },
+            "target": { "cell": "process-webserver" },
+            "vertices": [{ "x": 185, "y": 145 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-1",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Login Request (HTTPS)" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Login Request (HTTPS)",
+              "description": "User submits username and password credentials to the web server over HTTPS with TLS 1.2 or higher",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "process-webserver" },
+            "target": { "cell": "process-session" },
+            "vertices": [],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-2",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Validate Credentials" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Validate Credentials",
+              "description": "Web server forwards validated credentials to session manager for authentication processing",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "protocol": "Internal API",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "process-webserver" },
+            "target": { "cell": "store-db" },
+            "vertices": [{ "x": 785, "y": 145 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-3",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Query User Record (SQL)" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Query User Record (SQL)",
+              "description": "Web server queries the relational database to retrieve the stored password hash and verify user credentials",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "protocol": "SQL/TCP",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "store-db" },
+            "target": { "cell": "process-session" },
+            "vertices": [{ "x": 785, "y": 425 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-4",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "User Record Response" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "User Record Response",
+              "description": "Database returns the user record including stored password hash for comparison by the session manager",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": false,
+              "protocol": "SQL/TCP",
+              "threats": []
+            }
+          },
+          {
+            "type": "tm.Flow",
+            "source": { "cell": "process-session" },
+            "target": { "cell": "actor-user" },
+            "vertices": [{ "x": 185, "y": 425 }],
+            "attrs": {
+              "line": { "stroke": "#333333", "strokeDasharray": null, "targetMarker": { "name": "block" } }
+            },
+            "shape": "flow",
+            "id": "flow-5",
+            "zIndex": 3,
+            "labels": [{ "attrs": { "label": { "text": "Session Token Response (HTTPS)" } } }],
+            "data": {
+              "type": "tm.Flow",
+              "name": "Session Token Response (HTTPS)",
+              "description": "Signed session token returned to the user browser via a secure HTTP-only cookie upon successful authentication",
+              "outOfScope": false,
+              "isBidirectional": false,
+              "isEncrypted": true,
+              "protocol": "HTTPS",
+              "threats": []
+            }
+          }
+        ]
       }
     ],
     "diagramTop": 1,
     "reviewer": "",
-    "threatTop": 0
+    "threatTop": 4
   }
 }
